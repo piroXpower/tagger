@@ -4,8 +4,8 @@ import random
 import os
 
 # Replace with your API credentials and session string
-API_ID = os.environ.get("API_ID")
-API_HASH = os.environ.get("API_HASH")
+API_ID = int(os.environ.get("API_ID", "21364355")) 
+API_HASH = os.environ.get("API_HASH", " 72f11aec1dd3e5764554d477341a3d0b") 
 SESSION_STRING = os.environ.get("SESSION_STRING")
 
 app = Client(SESSION_STRING, api_id=API_ID, api_hash=API_HASH)
