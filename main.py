@@ -1,11 +1,11 @@
 from pyrogram import Client, filters, enums
-import asyncio
 import random
 import os
+import time
 
 # Replace with your API credentials and session string
 API_ID = int(os.environ.get("API_ID", "21364355")) 
-API_HASH = os.environ.get("API_HASH", " 72f11aec1dd3e5764554d477341a3d0b") 
+API_HASH = os.environ.get("API_HASH", "72f11aec1dd3e5764554d477341a3d0b") 
 SESSION_STRING = os.environ.get("SESSION_STRING")
 
 app = Client(SESSION_STRING, api_id=API_ID, api_hash=API_HASH)
@@ -232,27 +232,21 @@ Emojis = [
 ]
 
 
-async def tag_online_members():
+def tag_online_members():
     try:
-        async for member in app.get_chat_members(CHAT_ID, filter=enums.ChatMembersFilter.ONLINE):
+        for member in app.get_chat_members(CHAT_ID, filter=enums.ChatMembersFilter.ONLINE):
             if not member.user.is_bot: #avoid tagging bots
                 message = f"{member.user.mention} {random.choice(tag_messages)} {random.choice(emojis)}"
-                await app.send_message(CHAT_ID, message)
-                await asyncio.sleep(3)  # Delay between tags (adjust as needed)
+                app.send_message(CHAT_ID, message)
+                time.sleep(1.5)   # Delay between tags (adjust as needed)
     except Exception as e:
         print(f"Error during tagging: {e}")
 
 @app.on_message(filters.command("gm") & filters.me)
-async def start_tagging(client, message):
-    await message.reply_text("Tagging online members...")
-    await tag_online_members()
-    await message.reply_text("@MrSameerXD nibba khi ka!")
+def start_tagging(client, message):
+    message.reply_text("Tagging online members...")
+    tag_online_members()
+    message.reply_text("@MrSameerXD nibba khi ka!")
 
-async def main():
-    async with app:
-        print("Userbot started. Use /gm to begin tagging.")
-        await app.idle()
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+app.start()
+app.idle()
