@@ -1,14 +1,12 @@
-from pyrogram import Client, filters, enums
+import asyncio
 import random
 import os
-import time
+from telethon import TelegramClient, events, functions, types
 
 # Replace with your API credentials and session string
-API_ID = int(os.environ.get("API_ID", "21364355")) 
-API_HASH = os.environ.get("API_HASH", "72f11aec1dd3e5764554d477341a3d0b") 
-SESSION_STRING = os.environ.get("SESSION_STRING")
-
-app = Client(SESSION_STRING, api_id=API_ID, api_hash=API_HASH)
+API_ID = int(os.environ.get("API_ID", "21364355"))
+API_HASH = os.environ.get("API_HASH", "72f11aec1dd3e5764554d477341a3d0b")
+SESSION_STRING = os.environ.get("SESSION_STRING", "")
 
 # Replace with your desired chat ID
 CHAT_ID = -1002206769379  # Example chat ID, replace with yours
@@ -231,22 +229,28 @@ Emojis = [
           "🦓","🦍", "🦧"
 ]
 
+client = TelegramClient(SESSION_STRING, API_ID, API_HASH)
 
-def tag_online_members():
+async def tag_online_members():
     try:
-        for member in app.get_chat_members(CHAT_ID, filter=enums.ChatMembersFilter.ONLINE):
-            if not member.user.is_bot: #avoid tagging bots
-                message = f"{member.user.mention} {random.choice(tag_messages)} {random.choice(emojis)}"
-                app.send_message(CHAT_ID, message)
-                time.sleep(1.5)   # Delay between tags (adjust as needed)
+        async for participant in client.iter_participants(CHAT_ID, filter=types.ChannelParticipantsOnline):
+            if not participant.bot:
+                message = f"{participant.mention} {random.choice(Tag_messages)} {random.choice(Emojis)}"
+                await client.send_message(CHAT_ID, message)
+                await asyncio.sleep(1.5)  # Delay between tags (adjust as needed)
     except Exception as e:
         print(f"Error during tagging: {e}")
 
-@app.on_message(filters.command("gm") & filters.me)
-def start_tagging(client, message):
-    message.reply_text("Tagging online members...")
-    tag_online_members()
-    message.reply_text("@MrSameerXD nibba khi ka!")
+@client.on(events.NewMessage(pattern=r"^/gm$", from_users='me'))
+async def start_tagging(event):
+    await event.respond("Tagging online members...")
+    await tag_online_members()
+    await event.respond("@MrSameerXD nibba khi ka!")
 
-app.start()
-app.idle()
+async def main():
+    await client.start()
+    print("Client started. Running...")
+    await client.run_until_disconnected()
+
+if __name__ == "__main__":
+    asyncio.run(main())
